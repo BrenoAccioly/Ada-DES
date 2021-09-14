@@ -31,4 +31,7 @@ package Permutation is
     -- Initial Permutation
     function IP (Block: Unsigned_64) return Unsigned_64;
 
+    -- Final Permutation
+    function LP (Block: Unsigned_64) return Unsigned_64;
+
 end Permutation;

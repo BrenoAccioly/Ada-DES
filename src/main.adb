@@ -10,6 +10,7 @@ procedure Main is
     Max_Length: constant Integer := 8;
     package Byte_IO is new Ada.Sequential_IO (Unsigned_8);
     package IO_64 is new Ada.Sequential_IO (Unsigned_64);
+    package U64_IO is new Ada.Text_IO.Modular_IO (Interfaces.unsigned_64);
     type Byte_Array is array(1 .. Max_Length) of Unsigned_8;
 
     Filename:  String(1 .. 256);
@@ -23,7 +24,8 @@ procedure Main is
     Block64: Unsigned_64;
     BytePos: Integer range 1 .. 8;
 
-    Key: Unsigned_64 := 16#22234512987ABB23#;
+    Key: Unsigned_64 := 16#AABB09182736CCDD#;
+    --Key: Unsigned_64 := 16#133457799BBCDFF1#;
     Keys: Keys_Array;
 
     -- Adds padding to block
@@ -53,15 +55,29 @@ procedure Main is
 
         -- R XOR K
 
-        Expanded := Expanded or K;
+        Expanded := Expanded xor K;
 
         -- S-Boxes
         
         Result := Feistel.S_Boxes(Expanded);
 
+        Put_Line ("Sboxes:");
+        U64_IO.Put(
+            Unsigned_64 (Result),
+            Base=>16
+        );
+        New_Line;
+
         -- Straight
 
         Result := Feistel.Straight (Result);
+
+        Put_Line ("Straight:");
+        U64_IO.Put(
+            Unsigned_64 (Result),
+            Base=>16
+        );
+        New_Line;
 
         return Result;
     end DES_Function;
@@ -70,20 +86,25 @@ procedure Main is
     function Rounds(Block: Unsigned_64) return Unsigned_64 is
     L0: Unsigned_32 := 0; 
     R0: Unsigned_32 := 0; 
-    Result: Unsigned_64;  
+    Temp: Unsigned_32 := 0;
+    Result: Unsigned_64 := 0;  
     begin
         L0 := Unsigned_32 (shift_right(Block, 32));
         R0 := Unsigned_32 (Block and 16#FFFFFFFF#);
 
         for Round in 1 .. 16 loop
-            -- put_line("in development");
-            R0 := DES_Function(R0, Keys(Round));
+            Temp := R0;
+            R0 := L0 xor DES_Function(R0, Keys(Round));
+            L0 := Temp;
         end loop;
 
         Result := shift_left(Unsigned_64 (R0), 32) or Unsigned_64 (L0);
 
+        -- Final Permutation
+        Result := Permutation.LP (Result);
+
         return Result;
-    end Rounds; 
+    end Rounds;
 
 begin
     put_line ("Plaintext filename: ");
@@ -98,14 +119,22 @@ begin
         BlockArr(BytePos) := Byte;
 
         if BytePos = 8 then
+
             Block64 := AssembleBlock(BlockArr);
-            --put_line(Unsigned_64'Image (Block64));
+            --put_line ("Plaintext: ");
+            --U64_IO.Put(
+            --    Block64,
+            --    Base=>16
+            --);
+            --New_Line;
+            -- Testing 
+
+            --Block64 := 16#123456ABCD132536#;
+            --Block64 := 16#0123456789ABCDEF#;
             -- initial perm
             Block64 := Permutation.IP(Block64);
-            --put_line(Unsigned_64'Image (Permutation.IP(Block64)));
             -- rounds
             Block64 := Rounds(Block64);
-            put_line(Unsigned_64'Image (Block64));
 
             -- Write output
             IO_64.Create(OutFile, IO_64.Out_File, "Output");

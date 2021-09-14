@@ -6,7 +6,7 @@ package body Feistel is
     begin
         Expanded := 0;
         for I in 1 .. 48 loop
-            Expanded := Expanded or (shift_left(1 and shift_right(Unsigned_64 (R), E(I)-1), I-1));
+            Expanded := Expanded or (shift_left(1 and shift_right(Unsigned_64 (R), 32-E(I)), 48-I));
         end loop;
         return Expanded;
     end Expansion;
@@ -14,7 +14,7 @@ package body Feistel is
     function GetChunk (E: Unsigned_64; I: Integer) return Unsigned_8 is
     Chunk: Unsigned_8 := 2#00111111#;
     begin
-        Chunk := Unsigned_8 (Unsigned_64 (Chunk) and shift_right(E, 6*(I-1)));
+        Chunk := Unsigned_8 (Unsigned_64 (Chunk) and shift_right(E, 6*(8-I)));
         return Chunk;
     end GetChunk;
 
@@ -28,7 +28,7 @@ package body Feistel is
     function GetCol (Chunk: Unsigned_8) return Unsigned_8 is
     Col: Unsigned_8 := 0;
     begin
-        Col := shift_right(Col and 2#011110#, 1);
+        Col := shift_right(Chunk and 2#00011110#, 1);
         return Col;
     end GetCol;
 
@@ -38,19 +38,21 @@ package body Feistel is
     Chunk: Unsigned_8;
     begin
         -- Todo (16x4) (row)x16 + col
+        --Put_Line (Unsigned_64'image (E));
         for I in 1 .. 8 loop
             Chunk := GetChunk(E, I);
             --Put_Line ("Chunk: ");
             --Put_Line (Unsigned_8'image (Chunk));
-            --Put_Line ("Row: ");
-            --Put_Line (Unsigned_8'image (GetRow(Chunk)));
-            --Put_Line ("Col: ");
-            --Put_Line (Unsigned_8'image (GetCol(Chunk)));
+            --Put("Row: ");
+            --Put(Unsigned_8'image (GetRow(Chunk)));
+            --Put("Col: ");
+            --Put(Unsigned_8'image (GetCol(Chunk)));
+            --New_Line;
             Index := Integer (GetRow(Chunk)*16 + GetCol(Chunk) + 1);
             --Put_Line (Integer'image (Index));
             Chunk := Unsigned_8 (SBoxes(I)(Index));
             --Put_Line (Unsigned_8'image (Chunk));
-            Result := Result or shift_left(Unsigned_32 (Chunk), I * 4);
+            Result := Result or shift_left(Unsigned_32 (Chunk), (8-I) * 4);
         end loop;
 
         return Result; 
@@ -61,7 +63,7 @@ package body Feistel is
     Output: Unsigned_32 := 0;
     begin
         for I in 1 .. 32 loop
-            Output := Output or (shift_left(1 and shift_right(Unsigned_32 (c), P(I)-1), I-1));
+            Output := Output or (shift_left(1 and shift_right(Unsigned_32 (c), 32-P(I)), 32-I));
         end loop;
         return Output;
     end Straight;
