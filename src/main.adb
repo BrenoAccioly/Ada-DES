@@ -24,60 +24,35 @@ procedure Main is
     Block64: Unsigned_64;
     BytePos: Integer range 1 .. 8;
 
-    Key: Unsigned_64 := 16#AABB09182736CCDD#;
-    --Key: Unsigned_64 := 16#133457799BBCDFF1#;
+    Key: Unsigned_64;                
     Keys: Keys_Array;
 
     -- Adds padding to block
-    function InsertPadding(Block: Unsigned_64) return Unsigned_64 is
+    function InsertPaddingCMS(BlockArr: Byte_Array; Bytes: Natural) return Byte_Array is
+    NewBlock: Byte_Array;
     begin
-        -- TODO
-        return 0;
-    end InsertPadding;
-
-    -- Given an array of 8 bytes, returns a 64 bit integer  
-    function AssembleBlock(BlockArr: Byte_Array) return Unsigned_64 is
-    Block: Unsigned_64 := 0;  
-    begin
-        for I in 1 .. 8 loop
-            Block := Block or shift_left(Unsigned_64(BlockArr(I)), (8-I)*8); 
+        NewBlock := BlockArr;
+        for I in 1 .. Bytes loop
+            NewBlock (9-I) := Unsigned_8 (Bytes);
         end loop;
-        return Block;
-    end AssembleBlock;     
+        return NewBlock;
+    end InsertPaddingCMS;   
 
     function DES_Function(R: Unsigned_32; K: Unsigned_64) return Unsigned_32 is
     Expanded: Unsigned_64;
     Result  : Unsigned_32;  
     begin
         -- Expands R to 48 bits
-
         Expanded := Feistel.Expansion(R);
 
         -- R XOR K
-
         Expanded := Expanded xor K;
 
         -- S-Boxes
-        
         Result := Feistel.S_Boxes(Expanded);
 
-        Put_Line ("Sboxes:");
-        U64_IO.Put(
-            Unsigned_64 (Result),
-            Base=>16
-        );
-        New_Line;
-
         -- Straight
-
         Result := Feistel.Straight (Result);
-
-        Put_Line ("Straight:");
-        U64_IO.Put(
-            Unsigned_64 (Result),
-            Base=>16
-        );
-        New_Line;
 
         return Result;
     end DES_Function;
@@ -99,18 +74,43 @@ procedure Main is
         end loop;
 
         Result := shift_left(Unsigned_64 (R0), 32) or Unsigned_64 (L0);
-
         -- Final Permutation
         Result := Permutation.LP (Result);
 
         return Result;
     end Rounds;
 
-begin
-    put_line ("Plaintext filename: ");
-    get_line (Filename, Length);
-    Byte_IO.open (F, Byte_IO.In_File, Filename);
+    -- Encrypts block
+    function AssembleBlock(BlockArr: Byte_Array) return Unsigned_64 is
+    Block: Unsigned_64 := 0;  
+    begin
+        for I in 1 .. 8 loop
+            Block := Block or shift_left(Unsigned_64(BlockArr(I)), (8-I)*8); 
+        end loop;
 
+        -- initial perm
+        Block64 := Permutation.IP(Block64);
+        -- rounds
+        Block64 := Rounds(Block64);
+
+        return Block;
+    end AssembleBlock;  
+
+begin
+    put_line ("Plaintext filename:");
+    get_line (Filename, Length);
+
+    Put_Line ("Key (In Hex):");
+    begin
+        Key := Unsigned_64'Value ("16#" & Get_Line & "#");
+    exception
+        when Constraint_Error => 
+            Put_Line ("Keys must be 64 bits long, inserted in hexadecimal");
+            return;
+    end;
+
+    Byte_IO.open (F, Byte_IO.In_File, Filename);
+    IO_64.Create(OutFile, IO_64.Out_File, "Output");
     Keys := KeysGen(Key);
 
     BytePos := 1;
@@ -119,37 +119,25 @@ begin
         BlockArr(BytePos) := Byte;
 
         if BytePos = 8 then
-
             Block64 := AssembleBlock(BlockArr);
-            --put_line ("Plaintext: ");
             --U64_IO.Put(
             --    Block64,
             --    Base=>16
             --);
             --New_Line;
-            -- Testing 
-
-            --Block64 := 16#123456ABCD132536#;
-            --Block64 := 16#0123456789ABCDEF#;
-            -- initial perm
-            Block64 := Permutation.IP(Block64);
-            -- rounds
-            Block64 := Rounds(Block64);
-
             -- Write output
-            IO_64.Create(OutFile, IO_64.Out_File, "Output");
             IO_64.Write (OutFile, Block64);
-            IO_64.Close (OutFile);
-
         end if;
         BytePos := (BytePos mod 8) + 1;
-    
     end loop;
-
     Byte_IO.Close (F);
 
-    -- TODO add padding if not multiple of 8
-
-    -- put_line("Cyphertext:");
+    if (BytePos /= 1) then
+        -- Insert Padding
+        BlockArr := InsertPaddingCMS (BlockArr, 9-BytePos);
+        Block64 := AssembleBlock(BlockArr);
+        IO_64.Write (OutFile, Block64);
+    end if;
+    IO_64.Close (OutFile);
    
 end Main;

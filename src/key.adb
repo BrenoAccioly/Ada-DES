@@ -34,18 +34,9 @@ package body Key is
     D: Unsigned_32 := 0;
     begin
 
-        --Put_Line ("Key:");
-        --U64_IO.Put(
-        --    Unsigned_64 (Key),
-        --    Base=>16
-        --);
-        --New_Line;
-
         K := KeyPC1(Key);
-        --IO.put(Integer_64 (K), Base => 16);
         C := Unsigned_32 (shift_right(K, 28));
         D := Unsigned_32 (K and 16#FFFFFFF#);
-
 
         for I in 1 .. 16 loop
             C := rotate_left_28(C, Shifts(I));
@@ -53,9 +44,6 @@ package body Key is
             K := shift_left(Unsigned_64 (C), 28) or Unsigned_64 (D);
             K := KeyPC2(K);
             Keys(I) := K;
-            --New_Line;
-            --IO.put(Integer_64 (K), Base => 2);
-            --Put_line(Unsigned_64'image (k));
         end loop;
 
         return Keys;

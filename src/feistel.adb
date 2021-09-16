@@ -37,17 +37,10 @@ package body Feistel is
     Index: Integer;
     Chunk: Unsigned_8;
     begin
-        -- Todo (16x4) (row)x16 + col
-        --Put_Line (Unsigned_64'image (E));
+
         for I in 1 .. 8 loop
             Chunk := GetChunk(E, I);
-            --Put_Line ("Chunk: ");
-            --Put_Line (Unsigned_8'image (Chunk));
-            --Put("Row: ");
-            --Put(Unsigned_8'image (GetRow(Chunk)));
-            --Put("Col: ");
-            --Put(Unsigned_8'image (GetCol(Chunk)));
-            --New_Line;
+
             Index := Integer (GetRow(Chunk)*16 + GetCol(Chunk) + 1);
             --Put_Line (Integer'image (Index));
             Chunk := Unsigned_8 (SBoxes(I)(Index));
