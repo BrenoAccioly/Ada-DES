@@ -27,7 +27,7 @@ procedure Main is
     Key: Unsigned_64;                
     Keys: Keys_Array;
 
-    -- Adds padding to block
+    -- Adds padding to block (PKCS#7)
     function InsertPaddingCMS(BlockArr: Byte_Array; Bytes: Natural) return Byte_Array is
     NewBlock: Byte_Array;
     begin
@@ -44,13 +44,10 @@ procedure Main is
     begin
         -- Expands R to 48 bits
         Expanded := Feistel.Expansion(R);
-
         -- R XOR K
         Expanded := Expanded xor K;
-
         -- S-Boxes
         Result := Feistel.S_Boxes(Expanded);
-
         -- Straight
         Result := Feistel.Straight (Result);
 
@@ -74,8 +71,6 @@ procedure Main is
         end loop;
 
         Result := shift_left(Unsigned_64 (R0), 32) or Unsigned_64 (L0);
-        -- Final Permutation
-        Result := Permutation.LP (Result);
 
         return Result;
     end Rounds;
@@ -85,13 +80,17 @@ procedure Main is
     Block: Unsigned_64 := 0;  
     begin
         for I in 1 .. 8 loop
-            Block := Block or shift_left(Unsigned_64(BlockArr(I)), (8-I)*8); 
+            Block := Block or shift_left(Unsigned_64(BlockArr(I)), (I-1)*8); 
         end loop;
 
         -- initial perm
-        Block64 := Permutation.IP(Block64);
+        Block := Permutation.IP(Block);
+
         -- rounds
-        Block64 := Rounds(Block64);
+        Block := Rounds(Block);
+
+        -- Final Permutation
+        Block := Permutation.LP (Block);
 
         return Block;
     end AssembleBlock;  
@@ -109,10 +108,18 @@ begin
             return;
     end;
 
+    --key := 16#AABB09182736CCDD#;
+
+    U64_IO.Put(
+        Key,
+        Base=>16
+    );
+    New_Line;
     Byte_IO.open (F, Byte_IO.In_File, Filename);
     IO_64.Create(OutFile, IO_64.Out_File, "Output");
-    Keys := KeysGen(Key);
-
+    
+    Keys := KeysGen(Key, True);
+    --Keys := KeysGen(Key, False);
     BytePos := 1;
     while not Byte_IO.End_Of_File (F) loop
         Byte_IO.read(F, Byte);

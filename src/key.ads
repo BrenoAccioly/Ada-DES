@@ -39,6 +39,6 @@ package Key is
         1, 2, 2, 2, 2, 2, 2, 1
     );
 
-    function KeysGen(Key: Unsigned_64) return Keys_Array;
+    function KeysGen(Key: Unsigned_64; Encrypt: Boolean) return Keys_Array;
 
 end Key;

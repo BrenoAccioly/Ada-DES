@@ -11,7 +11,7 @@ package body Permutation is
         return NewBlock;
     end IP;
 
-    -- Initial Permutation
+    -- Final Permutation
     function LP (Block: Unsigned_64) return Unsigned_64 is
         NewBlock: Unsigned_64;
     begin

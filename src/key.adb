@@ -27,7 +27,7 @@ package body Key is
         return (Shift_Left(Value, Amount) or Shift_Right (Value, 28 - Amount)) and 16#FFFFFFF#;
     end rotate_left_28;
 
-    function KeysGen(Key: Unsigned_64) return Keys_Array is
+    function KeysGen(Key: Unsigned_64; Encrypt: Boolean) return Keys_Array is
     Keys: Keys_Array;
     K: Unsigned_64 := 0;  
     C: Unsigned_32 := 0;
@@ -43,7 +43,12 @@ package body Key is
             D := rotate_left_28(D, Shifts(I));
             K := shift_left(Unsigned_64 (C), 28) or Unsigned_64 (D);
             K := KeyPC2(K);
-            Keys(I) := K;
+
+            if Encrypt then
+                Keys(I) := K;
+            else
+                Keys(17-I) := K;
+            end if;
         end loop;
 
         return Keys;
