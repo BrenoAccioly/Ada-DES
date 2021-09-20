@@ -1,7 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Interfaces; use Interfaces;
 package Permutation is
-    
     type Perm_Array is array(1 .. 64) of Integer;
 
     IP_Arr: constant Perm_Array := 
@@ -30,7 +29,6 @@ package Permutation is
 
     -- Initial Permutation
     function IP (Block: Unsigned_64) return Unsigned_64;
-
     -- Final Permutation
     function LP (Block: Unsigned_64) return Unsigned_64;
 

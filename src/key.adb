@@ -33,25 +33,20 @@ package body Key is
     C: Unsigned_32 := 0;
     D: Unsigned_32 := 0;
     begin
-
         K := KeyPC1(Key);
         C := Unsigned_32 (shift_right(K, 28));
         D := Unsigned_32 (K and 16#FFFFFFF#);
-
         for I in 1 .. 16 loop
             C := rotate_left_28(C, Shifts(I));
             D := rotate_left_28(D, Shifts(I));
             K := shift_left(Unsigned_64 (C), 28) or Unsigned_64 (D);
             K := KeyPC2(K);
-
             if Encrypt then
                 Keys(I) := K;
             else
                 Keys(17-I) := K;
             end if;
         end loop;
-
         return Keys;
     end KeysGen;      
-
 end Key;

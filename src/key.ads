@@ -1,12 +1,10 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Interfaces; use Interfaces;
-
 package Key is
-    
-    type Keys_Array is array(1 .. 16) of Unsigned_64;
+    type Keys_Array   is array(1 .. 16) of Unsigned_64;
     type Shifts_Array is array(1 .. 16) of Integer;
-    type PC1_Array is array(1 .. 56) of Integer;
-    type PC2_Array is array(1 .. 48) of Integer;
+    type PC1_Array    is array(1 .. 56) of Integer;
+    type PC2_Array    is array(1 .. 48) of Integer;
 
     PC1: constant PC1_Array := 
     (
@@ -40,5 +38,4 @@ package Key is
     );
 
     function KeysGen(Key: Unsigned_64; Encrypt: Boolean) return Keys_Array;
-
 end Key;

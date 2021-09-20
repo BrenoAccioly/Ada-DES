@@ -1,7 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Interfaces; use Interfaces;
 package Feistel is
-    
     type ExpansionFunction   is array(1 .. 48) of Integer;
     type SelectionFunction   is array(1 .. 64) of Integer;
     type PermutationFunction is array(1 .. 32) of Integer;
@@ -21,7 +20,7 @@ package Feistel is
 
     S1: constant SelectionFunction := 
     (
-        14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7,
+        14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0,  7,
          0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8,
          4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0,
         15, 12, 8, 2, 4, 9, 1, 7, 5, 11, 3, 14, 10, 0, 6, 13
@@ -54,7 +53,7 @@ package Feistel is
     S5: constant SelectionFunction := 
     (
          2, 12, 4, 1, 7, 10, 11, 6, 8, 5, 3, 15, 13, 0, 14, 9,
-        14, 11, 2, 12, 4, 7, 13, 1, 5, 0, 15, 10, 3, 9, 8, 6,
+        14, 11, 2, 12, 4, 7, 13, 1, 5, 0, 15, 10, 3, 9, 8,  6,
          4, 2, 1, 11, 10, 13, 7, 8, 15, 9, 12, 5, 6, 3, 0, 14,
         11, 8, 12, 7, 1, 14, 2, 13, 6, 15, 0, 9, 10, 4, 5, 3
     );
@@ -90,18 +89,18 @@ package Feistel is
 
     P: constant PermutationFunction :=
     (
-        16, 7, 20, 21,
+        16,  7, 20, 21,
         29, 12, 28, 17,
-        1, 15, 23, 26,
-        5, 18, 31, 10,
-        2, 8, 24, 14,
-        32, 27, 3, 9,
-        19, 13, 30, 6,
-        22, 11, 4, 25
+         1, 15, 23, 26,
+         5, 18, 31, 10,
+         2,  8, 24, 14,
+        32, 27,  3,  9,
+        19, 13, 30,  6,
+        22, 11,  4, 25
     );
 
-    function Expansion (R: Unsigned_32) return Unsigned_64;
-    function S_Boxes (E: Unsigned_64) return Unsigned_32;
-    function Straight (C: Unsigned_32) return Unsigned_32 ;
+    function Expansion (R: Unsigned_32)   return Unsigned_64;
+    function S_Boxes   (E: Unsigned_64)   return Unsigned_32;
+    function Straight  (C: Unsigned_32)   return Unsigned_32 ;
 
 end Feistel;

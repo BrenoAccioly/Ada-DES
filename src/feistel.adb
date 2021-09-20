@@ -1,5 +1,4 @@
 package body Feistel is
-    
     -- Expansion
     function Expansion (R: Unsigned_32) return Unsigned_64 is
     Expanded: Unsigned_64;
@@ -37,20 +36,14 @@ package body Feistel is
     Index: Integer;
     Chunk: Unsigned_8;
     begin
-
         for I in 1 .. 8 loop
             Chunk := GetChunk(E, I);
-
             Index := Integer (GetRow(Chunk)*16 + GetCol(Chunk) + 1);
-            --Put_Line (Integer'image (Index));
             Chunk := Unsigned_8 (SBoxes(I)(Index));
-            --Put_Line (Unsigned_8'image (Chunk));
             Result := Result or shift_left(Unsigned_32 (Chunk), (8-I) * 4);
         end loop;
-
         return Result; 
     end S_Boxes;
-
 
     function Straight (C: Unsigned_32) return Unsigned_32 is
     Output: Unsigned_32 := 0;
