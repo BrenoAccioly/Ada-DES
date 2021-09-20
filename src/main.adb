@@ -1,12 +1,12 @@
-with GNAT.Command_Line;   use GNAT.Command_Line;
-with Ada.Text_IO; use Ada.Text_IO;
-with Interfaces; use Interfaces;
-with Ada.Sequential_IO;
-with GNAT.Strings; use GNAT.Strings;
-with Ada.Directories; use Ada.Directories;
+with GNAT.Command_Line;       use GNAT.Command_Line;
+with Ada.Text_IO;             use Ada.Text_IO;
+with Interfaces;              use Interfaces;
+with GNAT.Strings;            use GNAT.Strings;
+with Ada.Directories;         use Ada.Directories;
 with Ada.Strings.Fixed;
+with Ada.Sequential_IO;
 
-with DES; use DES;
+with DES;                     use DES;
 
 procedure Main is 
     package U64_IO is new Ada.Text_IO.Modular_IO (Interfaces.unsigned_64);
@@ -31,16 +31,11 @@ begin
     begin
     loop
         case Getopt("e d f: o: h -key= -help") is
-            when 'e'=>
-                Encrypt := True;
-            when 'd'=>
-                Encrypt := False;
-            when 'f'=>
-                InPath  := new String'(Parameter);
-            when 'o'=>
-                OutPath := new String'(Parameter);
-            when 'h'=>
-                Usage; return;
+            when 'e'=> Encrypt := True;
+            when 'd'=> Encrypt := False;
+            when 'f'=> InPath  := new String'(Parameter);
+            when 'o'=> OutPath := new String'(Parameter);
+            when 'h'=> Usage; return;
             when '-' =>
                 if Full_Switch = "-key" then
                     begin
@@ -63,31 +58,26 @@ begin
     end;
 
     if InPath = null then
-        put_line ("File path not defined");
-        return;
+        put_line ("File path not defined"); return;
     end if;
     if OutPath = null then
-        if Encrypt then
+        if Encrypt then 
             OutPath := new String'("e_");
-        else
+        else 
             OutPath := new String'("d_");
         end if;
-        
         for I in 0..9999 loop
             if not (Exists (OutPath.all & Ada.Strings.Fixed.Trim(Integer'Image (I), Ada.Strings.Left))) then
-                if Encrypt then
-                    OutPath := new String'("e_" & Ada.Strings.Fixed.Trim(Integer'Image (I), Ada.Strings.Left));
-                else
-                    OutPath := new String'("d_" & Ada.Strings.Fixed.Trim(Integer'Image (I), Ada.Strings.Left));
-                end if;
+                OutPath := new String'(OutPath.all & Ada.Strings.Fixed.Trim(Integer'Image (I), Ada.Strings.Left));
                 exit;
             end if;
         end loop;
+        if(OutPath = Null) then return; end if;
     end if;
 
-    Put ("Plaintext filename : "); Put (InPath.all); New_Line;
-    Put ("Ciphertext filename: "); Put (OutPath.all); New_Line;
-    Put ("Key (In Hex): "); U64_IO.Put( Key, Base=>16); New_Line;
+    Put ("Input  filename: "); Put (InPath.all); New_Line;
+    Put ("Output filename: "); Put (OutPath.all); New_Line;
+    Put ("Key (In Hex)   : "); U64_IO.Put( Key, Base=>16); New_Line;
     
     DES.EncryptFile (Encrypt, Key, InPath.all, OutPath.all);
    

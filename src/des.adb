@@ -55,11 +55,11 @@ package body DES is
             Block := Block or Shift_Left(Unsigned_64(BlockArr(I)), (8-I)*8); 
         end loop;
         -- initial perm
-        Block := Permutation.IP(Block);
+        Block := Permutation.Permute (Block, Permutation.IP_Arr);
         -- rounds
         Block := Rounds (Block, Keys);
         -- Final Permutation
-        Block := Permutation.LP (Block);
+        Block := Permutation.Permute (Block, Permutation.LP_Arr);
         for I in 1 .. 8 loop
             FinalBlock := FinalBlock or Shift_Left(Shift_Right(Block, (I-1)*8) and 16#FF#, (8-I)*8); 
         end loop;

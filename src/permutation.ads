@@ -1,8 +1,8 @@
 with Ada.Text_IO; use Ada.Text_IO;
-with Interfaces; use Interfaces;
+with Interfaces;  use Interfaces;
 package Permutation is
     type Perm_Array is array(1 .. 64) of Integer;
-
+    -- Initial Permutation
     IP_Arr: constant Perm_Array := 
     (
         58, 50, 42, 34, 26, 18, 10, 2,
@@ -14,7 +14,7 @@ package Permutation is
         61, 53, 45, 37, 29, 21, 13, 5,
         63, 55, 47, 39, 31, 23, 15, 7
     );
-
+    -- Final Permutation
     LP_Arr: constant Perm_Array := 
     (
         40, 8, 48, 16, 56, 24, 64, 32,
@@ -26,10 +26,5 @@ package Permutation is
         34, 2, 42, 10, 50, 18, 58, 26,
         33, 1, 41,  9, 49, 17, 57, 25
     );
-
-    -- Initial Permutation
-    function IP (Block: Unsigned_64) return Unsigned_64;
-    -- Final Permutation
-    function LP (Block: Unsigned_64) return Unsigned_64;
-
+    function Permute (Block: Unsigned_64; Perm: Perm_Array) return Unsigned_64;
 end Permutation;
