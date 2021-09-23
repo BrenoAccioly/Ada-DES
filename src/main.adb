@@ -11,10 +11,12 @@ with DES;                     use DES;
 procedure Main is 
     package U64_IO is new Ada.Text_IO.Modular_IO (Interfaces.unsigned_64);
 
-    InPath     : String_Access;
-    OutPath    : String_Access;
-    Encrypt    : Boolean     := True;
-    Key        : Unsigned_64 :=    0;
+    InPath         : String_Access;
+    OutPath        : String_Access;
+    Encrypt        : Boolean     := True;
+    Key            : Unsigned_64 :=    0;
+    IV             : Unsigned_64 :=    0;
+    ModeOfOperation: Natural     := 2#0#;
 
     procedure Usage is
     begin
@@ -23,14 +25,16 @@ procedure Main is
         Put_Line (" -d          Decrypt mode");
         Put_Line (" -f <file>   Input Filepath");
         Put_Line (" -o <file>   Output Filepath");
-        Put_Line (" --Key       64bit Hexadecimal key");
+        Put_Line (" --key=<key> 64 bit Hexadecimal key");
+        Put_Line (" --ecb       Uses ECB mode of operation");
+        Put_Line (" --cbc=<iv>  Uses CBC mode, argument is a 64 bit initialization vector");
         Put_Line (" -h --help");
     end Usage;
 
 begin
     begin
     loop
-        case Getopt("e d f: o: h -key= -help") is
+        case Getopt("e d f: o: h -key= -ecb -cbc= -help") is
             when 'e'=> Encrypt := True;
             when 'd'=> Encrypt := False;
             when 'f'=> InPath  := new String'(Parameter);
@@ -43,6 +47,17 @@ begin
                     exception
                         when Constraint_Error => 
                         Put_Line ("Keys must be 64 bits long, inserted in hexadecimal");
+                        return;
+                    end;
+                elsif Full_Switch = "-ecb" then
+                    ModeOfOperation := DES.ECB_MODE;
+                elsif Full_Switch = "-cbc" then
+                    ModeOfOperation := DES.CBC_MODE;
+                    begin
+                        IV := Unsigned_64'Value ("16#" & Parameter & "#");
+                    exception
+                        when Constraint_Error => 
+                        Put_Line ("Initialization vector must be 64 bits long, inserted in hexadecimal");
                         return;
                     end;
                 elsif Full_Switch = "-help" then
@@ -79,6 +94,12 @@ begin
     Put ("Output filename: "); Put (OutPath.all); New_Line;
     Put ("Key (In Hex)   : "); U64_IO.Put( Key, Base=>16); New_Line;
     
-    DES.EncryptFile (Encrypt, Key, InPath.all, OutPath.all);
+    DES.EncryptFile (Encrypt, Key, InPath.all, OutPath.all, ModeOfOperation, IV);
+
+    if Encrypt then
+        Put_Line ("Encryption complete");
+    else
+        Put_Line ("Decryption complete");
+    end if;
    
 end Main;

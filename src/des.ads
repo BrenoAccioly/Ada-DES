@@ -6,13 +6,12 @@ with Permutation;
 with Feistel;
 package DES is
     Max_Length: constant Integer := 8;
+    ECB_MODE  : constant Natural := 2#0#;
+    CBC_MODE  : constant Natural := 2#1#;
     type Byte_Array is array(1 .. Max_Length) of Unsigned_8;
     package Byte_IO is new Ada.Sequential_IO (Unsigned_8);
     package IO_64   is new Ada.Sequential_IO (Unsigned_64);
+    package U64_IO  is new Ada.Text_IO.Modular_IO (Interfaces.unsigned_64);
 
-    function InsertPaddingCMS(BlockArr: Byte_Array; Bytes: Natural) return Byte_Array;
-    function DES_Function(R: Unsigned_32; K: Unsigned_64)           return Unsigned_32;
-    function Rounds(Block: Unsigned_64; Keys: Keys_Array)           return Unsigned_64;
-    function AssembleBlock(BlockArr: Byte_Array; Keys: Keys_Array)  return Unsigned_64;
-    procedure EncryptFile(Encrypt: Boolean; Key: Unsigned_64; InFileName: String; OutFileName: String);
+    procedure EncryptFile(Encrypt: Boolean; Key: Unsigned_64; InFileName: String; OutFileName: String; ModeOfOperation: Natural; IV: Unsigned_64);
 end DES;
